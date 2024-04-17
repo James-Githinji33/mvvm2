@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -32,126 +33,182 @@ import coil.request.ImageRequest
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import net.ezra.navigation.ROUTE_ADD_STUDENTS
+import net.ezra.navigation.ROUTE_HOME
+import net.ezra.navigation.ROUTE_PRODUCTS
 import java.util.UUID
+import android.widget.Toast;
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.res.painterResource
+import net.ezra.MainActivity
+import net.ezra.R
+import net.ezra.ui.home.HomeScreen
 
 
 @Composable
 fun AddStudents(navController: NavHostController) {
+Box(modifier = Modifier.fillMaxSize()) {
+    Image(painter = painterResource(id = R.drawable.img_1),
+        contentDescription = "",
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop
 
-
-    Column(
-
-        modifier = Modifier.padding(15.dp),
-
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-
-        Text(text = "Register Student")
-
-        var photoUri: Uri? by remember { mutableStateOf(null) }
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            photoUri = uri
-        }
-
-        var studentName by rememberSaveable {
-            mutableStateOf("")
-        }
-
-        var studentClass by rememberSaveable {
-            mutableStateOf("")
-        }
-        
-        
-
-
-        OutlinedTextField(
-            value = studentName,
-            onValueChange = { studentName = it },
-            label = { Text(text = "Name") },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = studentClass,
-            onValueChange = { studentClass= it },
-            label = { Text(text = "Class") },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        )
+    )
 
 
 
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
 
+            Column(
 
+                modifier = Modifier.padding(15.dp),
 
-            OutlinedButton(
-                onClick = {
-                    launcher.launch(
-                        PickVisualMediaRequest(
-                        //Here we request only photos. Change this to .ImageAndVideo if you want videos too.
-                        //Or use .VideoOnly if you only want videos.
-                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
-                    )
-                }
-            ) {
-                Text("Select Image")
-            }
-
-
-            if (photoUri != null) {
-                //Use Coil to display the selected image
-                val painter = rememberAsyncImagePainter(
-                    ImageRequest
-                        .Builder(LocalContext.current)
-                        .data(data = photoUri)
-                        .build()
-                )
-                
-                Image(
-                    painter = painter,
-                    contentDescription = null,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Text(
                     modifier = Modifier
-                        .padding(5.dp)
-                        .size(150.dp)
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Gray),
-                    contentScale = ContentScale.Crop,
+                        .clickable {
+                            navController.navigate(ROUTE_HOME) {
+                                popUpTo(ROUTE_ADD_STUDENTS) { inclusive = true }
+                            }
+                        },
+                    color = Color.Blue,
+                    text = "go to Home screen"
 
                 )
+
+                Text(text = "Register Student")
+
+                var photoUri: Uri? by remember { mutableStateOf(null) }
+                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                    photoUri = uri
+                }
+
+                var studentName by rememberSaveable {
+                    mutableStateOf("")
+                }
+
+                var studentClass by rememberSaveable {
+                    mutableStateOf("")
+                }
+
+                var studentLocation by rememberSaveable {
+                    mutableStateOf("")
+                }
+
+                var studentEmail by rememberSaveable {
+                    mutableStateOf("")
+                }
+
+                OutlinedTextField(
+                    value = studentName,
+                    onValueChange = { studentName = it },
+                    label = { Text(text = "Name") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = studentClass,
+                    onValueChange = { studentClass= it },
+                    label = { Text(text = "Class") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = studentLocation,
+                    onValueChange = { studentLocation= it },
+                    label = { Text(text = "Location") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = studentEmail,
+                    onValueChange = { studentEmail= it },
+                    label = { Text(text = "Email") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
+
+
+
+
+                OutlinedButton(
+                    onClick = {
+                        launcher.launch(
+                            PickVisualMediaRequest(
+                                //Here we request only photos. Change this to .ImageAndVideo if you want videos too.
+                                //Or use .VideoOnly if you only want videos.
+                                mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    }
+                ) {
+                    Text("Select Image")
+                }
+
+
+                if (photoUri != null) {
+                    //Use Coil to display the selected image
+                    val painter = rememberAsyncImagePainter(
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(data = photoUri)
+                            .build()
+                    )
+
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .size(150.dp)
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray),
+                        contentScale = ContentScale.Crop,
+
+                        )
+                }
+
+
+                OutlinedButton(onClick = {
+                    photoUri?.let { uploadImageToFirebaseStorage(it, studentName, studentClass, studentLocation, studentEmail) }
+
+                }) {
+
+                    Text(text = "Register")
+
+
+                }
+
+
+
+
+
+
+
+
+
+
+
             }
-
-
-        OutlinedButton(onClick = {
-            photoUri?.let { uploadImageToFirebaseStorage(it, studentName, studentClass) }
-            
-        }) {
-            
-            Text(text = "Register")
-
-            
         }
-
-
-
-
-
-
-
-
-
-
-
     }
+}
+
 
 }
 
 
 
-fun uploadImageToFirebaseStorage(imageUri: Uri, studentName: String, studentClass: String) {
+fun uploadImageToFirebaseStorage(imageUri: Uri, studentName: String, studentClass: String, studentLocation: String, studentEmail: String) {
     val storageRef = FirebaseStorage.getInstance().reference
     val imageRef = storageRef.child("images/${UUID.randomUUID()}")
 
@@ -166,7 +223,7 @@ fun uploadImageToFirebaseStorage(imageUri: Uri, studentName: String, studentClas
     }.addOnCompleteListener { task ->
         if (task.isSuccessful) {
             val downloadUri = task.result
-            saveToFirestore(downloadUri.toString(), studentName, studentClass)
+            saveToFirestore(downloadUri.toString(), studentName, studentClass, studentLocation, studentEmail)
         } else {
 
 
@@ -174,12 +231,14 @@ fun uploadImageToFirebaseStorage(imageUri: Uri, studentName: String, studentClas
     }
 }
 
-fun saveToFirestore(imageUrl: String, studentName: String, studentClass: String) {
+fun saveToFirestore(imageUrl: String, studentName: String, studentClass: String, studentLocation: String, studentEmail: String) {
     val db = Firebase.firestore
     val imageInfo = hashMapOf(
         "imageUrl" to imageUrl,
         "studentName" to studentName,
         "studentClass" to studentClass,
+        "studentLocation" to studentLocation,
+        "studentEmail" to studentEmail
 
 
        
@@ -191,7 +250,7 @@ fun saveToFirestore(imageUrl: String, studentName: String, studentClass: String)
     db.collection("Students")
         .add(imageInfo)
         .addOnSuccessListener {
-          
+
 
 
         }
